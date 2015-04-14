@@ -24,7 +24,7 @@ function emberjs__pages__v1_retrieve_page($resource, $entity_id) {
             if(isset($node->rdf_mapping)) unset($node->rdf_mapping);
 
             $config = emberjs__fields__get_fields_types(); // get field config
-            $nodeFormatted = emberjs__fields__api_format_entity($node, $config);
+            $nodeFormatted = emberjs__fields__api_format_entity($node, $config, $resource);
 
             return $nodeFormatted;
         }
@@ -39,7 +39,7 @@ function emberjs__pages__v1_retrieve_page($resource, $entity_id) {
             if(isset($term->rdf_mapping)) unset($term->rdf_mapping);
 
             $config = emberjs__fields__get_fields_types(); // get field config
-            $termFormatted = emberjs__fields__api_format_entity($term, $config);
+            $termFormatted = emberjs__fields__api_format_entity($term, $config, $resource);
 
             return $termFormatted;
         }
