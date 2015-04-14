@@ -12,14 +12,34 @@ function emberjs__fields__api_format_entity($entity, $config, $resource_name, $r
 
     foreach($entity as $k => $v) {
         $fieldType = isset($config[$k]) ? $config[$k] : FALSE;
-        $value = emberjs__fields__get_field_value($v, $fieldType, $recursive);
+        $value = emberjs__fields__get_field_value($v, $fieldType, $config, $recursive);
 
-        $formatted->{$k} = $value;
+        if(!isset($value['has_attachment'])) {
+            $formatted->{$k} = $value;
+        }
+        else {
+            $formatted->{$k} = $value['value'];
+
+            $bundle = $value['bundle'];
+            $attachment = $value['attachment'];
+
+            if($bundle === $resource_name) // avoid collision with original resource
+                $bundle .= '_1';
+
+            if(is_array($attachment)) {
+                foreach($attachment as $a => $b) {
+                    $output->{$bundle}[] = $b;
+                }
+            }
+            else {
+                $output->{$bundle}[] = $attachment;
+            }
+        }
     }
 
     $output->{$resource_name} = array($formatted);
 
-    return $output;
+    return $recursive ? $output : $formatted;
 }
 
 
@@ -41,7 +61,7 @@ function emberjs__fields__get_fields_types() {
 /**
  *
  */
-function emberjs__fields__get_field_value($field, $fieldType, $recursive) {
+function emberjs__fields__get_field_value($field, $fieldType, $config, $recursive) {
 
     $value = NULL;
 
@@ -55,12 +75,22 @@ function emberjs__fields__get_field_value($field, $fieldType, $recursive) {
     $fieldValue = reset($field);
 
     if(count($fieldValue) == 1) {
-        return emberjs__fields__extract_field_data($fieldValue[0], $fieldType, $recursive);
+        return emberjs__fields__extract_field_data($fieldValue[0], $fieldType, $config, $recursive);
     }
 
     $value = array();
     foreach($fieldValue as $k => $v) {
-        $value[] = emberjs__fields__extract_field_data($v, $fieldType, $recursive);
+        $temp = emberjs__fields__extract_field_data($v, $fieldType, $config, $recursive);
+
+        if(!isset($temp['has_attachment'])) {
+            $value[] = $temp;
+        }
+        else {
+            $value['has_attachment'] = TRUE;
+            $value['bundle'] = $temp['bundle'];
+            $value['value'][] = $temp['value'];
+            $value['attachment'][] = $temp['attachment'];
+        }
     }
 
     return $value;
@@ -71,7 +101,7 @@ function emberjs__fields__get_field_value($field, $fieldType, $recursive) {
 /**
  *
  */
-function emberjs__fields__extract_field_data($field, $fieldType, $recursive) {
+function emberjs__fields__extract_field_data($field, $fieldType, $config, $recursive) {
 
     $value = false;
 
@@ -93,13 +123,48 @@ function emberjs__fields__extract_field_data($field, $fieldType, $recursive) {
 
         case 'taxonomy_term_reference':
             $tid = $field['tid'];
-            $term = taxonomy_term_load($tid);
-            $value = new StdClass();
-            $value->{$tid} = $term;
+            if($recursive) {
+                $term = taxonomy_term_load($tid);
+                if($term) {
+                    $bundle = $term->vocabulary_machine_name;
+                    $term = emberjs__fields__api_format_entity($term, $config, $bundle, FALSE);
+                    $value = array(
+                        'has_attachment'    => TRUE,
+                        'value'             => $tid,
+                        'bundle'            => $bundle,
+                        'attachment'        => $term,
+                    );
+                }
+                else {
+                    $value = $tid;
+                }
+            }
+            else {
+                $value = $tid;
+            }
             break;
 
         case 'node_reference':
-            $value = $field['nid'];
+            $nid = $field['nid'];
+            if($recursive) {
+                $node = node_load($nid);
+                if($node) {
+                    $bundle = $node->type;
+                    $node = emberjs__fields__api_format_entity($node, $config, $bundle, FALSE);
+                    $value = array(
+                        'has_attachment'    => TRUE,
+                        'value'             => $nide,
+                        'bundle'            => $bundle,
+                        'attachment'        => $node,
+                    );
+                }
+                else {
+                    $value = $nid;
+                }
+            }
+            else {
+                $value = $nid;
+            }
             break;
 
         default:
