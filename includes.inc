@@ -38,3 +38,10 @@ function emberjs__taxonomy__get_by_voc_name($vid) {
     return $query->execute()->fetchAll();
 }
 
+
+function emberjs__messages__resource_not_found($resource) {
+    return services_error(t('Could not find a resource with the name: !name', array(
+        '!name'     => $resource,
+    )), 404);
+}
+
