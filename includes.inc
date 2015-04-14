@@ -1,6 +1,11 @@
 <?php
 
 
+/**
+ * Checks whether a content type machine name exists.
+ *
+ * Return FALSE if exists, FALSE otherwise.
+ */
 function emberjs__node_type_exists($type) {
 
     $query = db_select('node_type', 't')
@@ -13,6 +18,12 @@ function emberjs__node_type_exists($type) {
 }
 
 
+/**
+ * Return vocabular_id for a given vocabulary machine name.
+ *
+ * return $vid if vocabulary machine name exists,
+ * FALSE otherwise.
+ */
 function emberjs__taxonomy__get_vid_from_name($vocname) {
 
     $query = db_select('taxonomy_vocabulary', 'v')
@@ -25,7 +36,12 @@ function emberjs__taxonomy__get_vid_from_name($vocname) {
 }
 
 
-function emberjs__taxonomy__get_by_voc_name($vid) {
+/**
+ * Return all terms under a given $vid in the following format:
+ * [{id: 2, name: "term 1"}, {id: 5, "term 2"}]
+ * if no $vid specified, return all terms.
+ */
+function emberjs__taxonomy__get_by_voc_name($vid = FALSE) {
 
     $query = db_select('taxonomy_term_data', 'd');
     $query->addField('d', 'tid', 'id');
@@ -39,6 +55,9 @@ function emberjs__taxonomy__get_by_voc_name($vid) {
 }
 
 
+/**
+ * Return a custom 404 message.
+ */
 function emberjs__messages__resource_not_found($resource) {
     return services_error(t('Could not find a resource with the name: !name', array(
         '!name'     => $resource,
