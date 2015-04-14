@@ -1,0 +1,7 @@
+name = EmberJS Module
+description = none
+core = 7.x
+package = Custom Modules
+
+dependencies[] = services
+

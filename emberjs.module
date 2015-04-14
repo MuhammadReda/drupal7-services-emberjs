@@ -1,0 +1,74 @@
+<?php
+
+
+define('EMBERJS_API_BASE_URL', 'v1');
+
+
+/**
+ * Implementation of hook_services_resources()
+ */
+function emberjs_services_resources() {
+
+    $items = array();
+
+    $items[EMBERJS_API_BASE_URL] = array(
+        'retrieve'  => array(
+            'help'                      => t('EmberJS Resource - Retrieve'),
+            'access callback'           => 'user_access',
+            'access arguments'          => array('access content'),
+            'callback'                  => 'emberjs__pages__v1_retrieve_page',
+            'file'                      => array(
+                'type'                  => 'inc',
+                'module'                => 'emberjs',
+                'name'                  => 'pages.retrieve',
+            ),
+            'args'                      => array(
+                array(
+                    'name'              => 'resource',
+                    'type'              => 'string',
+                    'optional'          => FALSE,
+                    'source'            => array('path' => 0),
+                    'description'       => t('The resource in query. such as, contracts, territories, etc.'),
+                ),
+                array(
+                    'name'              => 'id',
+                    'type'              => 'int',
+                    'optional'          => TRUE,
+                    'source'            => array('path' => 1),
+                    'description'       => t('The resource id (nid / tid)'),
+                ),
+            ),
+        ),
+
+        'create'    => array(
+            'help'                      => t('Create new resource'),
+            'access callback'           => 'user_access',
+            'access arguments'          => array('access content'),
+            'callback'                  => 'emberjs__pages__v1_create_page',
+            'file'                      => array(
+                'type'                  => 'inc',
+                'module'                => 'emberjs',
+                'name'                  => 'pages.create',
+            ),
+            'args'                      => array(
+                array(
+                    'name'              => 'resource',
+                    'type'              => 'string',
+                    'optional'          => FALSE,
+                    'source'            => array('path' => 0),
+                    'description'       => t('The resource in query. such as, contracts, territories, etc.'),
+                ),
+                array(
+                    'name'                  => 'data',
+                    'type'                  => 'struct',
+                    'optional'              => FALSE,
+                    'source'                => 'data',
+                )
+            ),
+        ),
+    );
+
+    return $items;
+}
+
+
