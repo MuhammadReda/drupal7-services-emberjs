@@ -84,9 +84,7 @@ function emberjs__pages__v1_create_page($resource, $data) {
 
     // no matching resource, throw a 404 error.
     else {
-        return services_error(t('Could not find a resource with the name: !name', array(
-            '!name'     => $resource,
-        )), 404);
+        return emberjs__messages__resource_not_found($resource);
     }
 
     return 'a';
