@@ -2,16 +2,22 @@
 
 
 
-function emberjs__fields__api_format_entity($entity, $config) {
+/**
+ * Formats an entity.
+ */
+function emberjs__fields__api_format_entity($entity, $config, $resource_name, $recursive = TRUE) {
 
     $output = new StdClass();
+    $formatted = new StdClass();
 
     foreach($entity as $k => $v) {
         $fieldType = isset($config[$k]) ? $config[$k] : FALSE;
-        $value = emberjs__fields__get_field_value($v, $fieldType);
+        $value = emberjs__fields__get_field_value($v, $fieldType, $recursive);
 
-        $output->{$k} = $value;
+        $formatted->{$k} = $value;
     }
+
+    $output->{$resource_name} = array($formatted);
 
     return $output;
 }
@@ -19,7 +25,8 @@ function emberjs__fields__api_format_entity($entity, $config) {
 
 
 /**
- *
+ * Return field types from `field_config` table
+ * as an associative array, keyed by `field_name`
  */
 function emberjs__fields__get_fields_types() {
 
@@ -31,7 +38,10 @@ function emberjs__fields__get_fields_types() {
 }
 
 
-function emberjs__fields__get_field_value($field, $fieldType) {
+/**
+ *
+ */
+function emberjs__fields__get_field_value($field, $fieldType, $recursive) {
 
     $value = NULL;
 
@@ -45,12 +55,12 @@ function emberjs__fields__get_field_value($field, $fieldType) {
     $fieldValue = reset($field);
 
     if(count($fieldValue) == 1) {
-        return emberjs__fields__extract_field_data($fieldValue[0], $fieldType);
+        return emberjs__fields__extract_field_data($fieldValue[0], $fieldType, $recursive);
     }
 
     $value = array();
     foreach($fieldValue as $k => $v) {
-        $value[] = emberjs__fields__extract_field_data($v, $fieldType);
+        $value[] = emberjs__fields__extract_field_data($v, $fieldType, $recursive);
     }
 
     return $value;
@@ -58,7 +68,10 @@ function emberjs__fields__get_field_value($field, $fieldType) {
 
 
 
-function emberjs__fields__extract_field_data($field, $fieldType) {
+/**
+ *
+ */
+function emberjs__fields__extract_field_data($field, $fieldType, $recursive) {
 
     $value = false;
 
